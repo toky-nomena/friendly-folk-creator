@@ -54,10 +54,10 @@ export const AddPersonForm = ({ onSubmit }: AddPersonFormProps) => {
     const result = safeParse(personSchema, data);
     
     if (!result.success) {
-      toast({
-        variant: "destructive",
-        title: "Validation Error",
-        description: result.issues[0].message,
+      const firstError = result.issues[0];
+      form.setError(firstError.path?.[0] as any, {
+        type: "manual",
+        message: firstError.message,
       });
       return;
     }
@@ -73,7 +73,7 @@ export const AddPersonForm = ({ onSubmit }: AddPersonFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="firstName"
@@ -119,7 +119,7 @@ export const AddPersonForm = ({ onSubmit }: AddPersonFormProps) => {
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP")
+                          format(field.value, "yyyy-MM-dd")
                         ) : (
                           <span>Pick a date</span>
                         )}
