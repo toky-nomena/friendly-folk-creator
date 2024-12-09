@@ -1,11 +1,37 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { AddPersonForm } from "@/components/AddPersonForm";
+import { PersonTable } from "@/components/PersonTable";
+import { Person } from "@/lib/types";
 
 const Index = () => {
+  const [people, setPeople] = useState<Person[]>([]);
+
+  const handleAddPerson = (personData: Omit<Person, "id" | "createdAt">) => {
+    const newPerson: Person = {
+      ...personData,
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+    };
+    setPeople((prev) => [...prev, newPerson]);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="container mx-auto py-8 space-y-8">
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold">Person Management</h1>
+        <p className="text-muted-foreground">
+          Add and manage people in the system
+        </p>
+      </div>
+
+      <div className="p-6 border rounded-lg bg-card">
+        <h2 className="text-xl font-semibold mb-4">Add New Person</h2>
+        <AddPersonForm onSubmit={handleAddPerson} />
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">People List</h2>
+        <PersonTable people={people} />
       </div>
     </div>
   );
