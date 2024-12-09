@@ -13,6 +13,7 @@ import {
 
 const Index = () => {
   const [people, setPeople] = useState<Person[]>([]);
+  const [open, setOpen] = useState(false);
 
   const handleAddPerson = (personData: Omit<Person, "id" | "createdAt">) => {
     const newPerson: Person = {
@@ -32,7 +33,7 @@ const Index = () => {
             Add and manage people in the system
           </p>
         </div>
-        <Sheet>
+        <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button>Add Person</Button>
           </SheetTrigger>
@@ -41,7 +42,7 @@ const Index = () => {
               <SheetTitle>Add New Person</SheetTitle>
             </SheetHeader>
             <div className="mt-8">
-              <AddPersonForm onSubmit={handleAddPerson} />
+              <AddPersonForm onSubmit={handleAddPerson} onOpenChange={() => setOpen(false)} />
             </div>
           </SheetContent>
         </Sheet>

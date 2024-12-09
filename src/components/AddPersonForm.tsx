@@ -20,24 +20,26 @@ import { faker } from "@faker-js/faker";
 import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { format } from "date-fns";
-import { Person } from "@/lib/types";
-import { personSchema } from "@/lib/schema";
-import { safeParse } from "valibot";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Person, personSchema } from "@/lib/schema";
 
 interface AddPersonFormProps {
   onSubmit: (data: Omit<Person, "id" | "createdAt">) => void;
+  onOpenChange?: () => void;
 }
 
-export const AddPersonForm = ({ onSubmit }: AddPersonFormProps) => {
+export const AddPersonForm = ({
+  onSubmit,
+  onOpenChange,
+}: AddPersonFormProps) => {
   const { toast } = useToast();
-  const form = useForm({
+  const form = useForm<Person>({
     defaultValues: {
       firstName: "",
       lastName: "",
-      dateOfBirth: undefined as unknown as Date,
-      email: "",
-      driverLicense: "",
+      dateOfBirth: faker.date.birthdate(),
     },
+    resolver: valibotResolver(personSchema),
   });
 
   const generateFakeData = () => {
@@ -50,29 +52,19 @@ export const AddPersonForm = ({ onSubmit }: AddPersonFormProps) => {
     form.setValue("dateOfBirth", dateOfBirth);
   };
 
-  const handleSubmit = (data: any) => {
-    const result = safeParse(personSchema, data);
-    
-    if (!result.success) {
-      const firstError = result.issues[0];
-      form.setError(firstError.path?.[0] as any, {
-        type: "manual",
-        message: firstError.message,
-      });
-      return;
-    }
-
+  const handleSubmit = form.handleSubmit((data) => {
     onSubmit(data);
     form.reset();
     toast({
       title: "Success",
       description: "Person added successfully",
     });
-  };
+    onOpenChange?.();
+  });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
@@ -108,37 +100,9 @@ export const AddPersonForm = ({ onSubmit }: AddPersonFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Date of Birth *</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "yyyy-MM-dd")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <Input {...field} type="date" />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

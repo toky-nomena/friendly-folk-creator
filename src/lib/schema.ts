@@ -1,28 +1,42 @@
-import { email, maxLength, minLength, object, optional, string, date, pipe } from 'valibot';
+import {
+  email,
+  maxLength,
+  minLength,
+  object,
+  optional,
+  string,
+  date,
+  pipe,
+  InferInput,
+} from "valibot";
 
 export const personSchema = object({
-  firstName: string([
+  firstName: pipe(
+    string(),
+    minLength(2, "First name must be at least 5 characters"),
+    maxLength(20, "First name must be less than 20 characters")
+  ),
+  lastName: pipe(
+    string(),
+    minLength(2, "Last name must be at least 5 characters"),
+    maxLength(20, "Last name must be less than 20 characters")
+  ),
+  dateOfBirth: optional(date("Date of birth must be a valid date")),
+  email: optional(pipe(string(), email("Please enter a valid email address"))),
+  driverLicense: optional(
     pipe(
-      minLength(2, 'First name must be at least 2 characters'),
-      maxLength(50, 'First name must be less than 50 characters')
+      string(),
+      minLength(5, "Driver license must be at least 5 characters"),
+      maxLength(20, "Driver license must be less than 20 characters")
     )
-  ]),
-  lastName: string([
+  ),
+  policyNumber: optional(
     pipe(
-      minLength(2, 'Last name must be at least 2 characters'),
-      maxLength(50, 'Last name must be less than 50 characters')
+      string(),
+      minLength(5, "Policy number must be at least 5 characters"),
+      maxLength(20, "Policy number must be less than 20 characters")
     )
-  ]),
-  dateOfBirth: date('Date of birth is required'),
-  email: optional(string([
-    pipe(
-      email('Please enter a valid email address')
-    )
-  ])),
-  driverLicense: optional(string([
-    pipe(
-      minLength(5, 'Driver license must be at least 5 characters'),
-      maxLength(20, 'Driver license must be less than 20 characters')
-    )
-  ])),
+  ),
 });
+
+export type Person = InferInput<typeof personSchema>;
